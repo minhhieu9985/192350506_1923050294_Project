@@ -3,7 +3,7 @@
 > **Đồ án cuối kỳ môn Lập trình Mobile (Final Project — Topic 02: Campus Marketplace)**  
 > **Trường**: Trường Đại học Công nghệ Đồng Nai (DNTU) — Khoa Công nghệ Thông tin  
 > **Mã lớp**: TH7011101 (23DTH1)  
-> **Nhóm thực hiện**: Tối đa 3 sinh viên  
+> **Nhóm thực hiện**: Ngô Vũ Quốc An, Lê Minh Hiếu
 
 ---
 
