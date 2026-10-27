@@ -23,26 +23,37 @@ export default function SignInScreen() {
   const signIn = useAuthStore((s) => s.signIn);
   const isLoading = useAuthStore((s) => s.isLoading);
 
-  const [email, setEmail] = useState('quan.lm@dntu.edu.vn');
-  const [studentId, setStudentId] = useState('23DTH101');
+  const [email, setEmail] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleManualSignIn = async () => {
-    if (!email.trim() || !studentId.trim()) {
-      setErrorMsg('Vui lòng nhập đầy đủ Email trường và Mã số sinh viên (MSSV)');
+    const cleanStudentId = studentId.trim();
+    if (!cleanStudentId) {
+      setErrorMsg('Vui lòng nhập Mã số sinh viên (MSSV)');
       return;
     }
     setErrorMsg(null);
-    await signIn('buyer');
+    console.log('Manual Sign-in with MSSV:', cleanStudentId, 'Email:', email);
+    await signIn({
+      studentId: cleanStudentId,
+      email: email.trim() || undefined,
+      role: 'buyer',
+    });
+    // Clear inputs on successful sign in
+    setEmail('');
+    setStudentId('');
     router.replace('/(tabs)');
   };
 
   const handleQuickDemo = async (role: 'buyer' | 'seller') => {
     setErrorMsg(null);
     await signIn(role);
+    setEmail('');
+    setStudentId('');
     Alert.alert(
       'Đăng nhập thành công',
-      `Chào mừng bạn đăng nhập với vai trò: ${role === 'seller' ? 'Người bán (Seller)' : 'Sinh viên mua (Buyer)'}`,
+      `Chào mừng bạn đăng nhập với vai trò: ${role === 'seller' ? 'Người bán (Seller - 23DTH102)' : 'Sinh viên mua (Buyer - 23DTH101)'}`,
       [{ text: 'Vào ứng dụng', onPress: () => router.replace('/(tabs)') }]
     );
   };
