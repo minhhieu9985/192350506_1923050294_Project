@@ -38,7 +38,11 @@ export default function ListingDetailScreen() {
 
   // Refined role-based logic
   const isSeller = currentUser?.role === 'seller';
-  const isOwnListing = currentUser?.id === listing?.sellerId;
+  const isOwnListing =
+    (currentUser?.id && currentUser.id === listing?.sellerId) ||
+    (currentUser?.studentId &&
+      (currentUser.studentId === listing?.sellerName ||
+        currentUser.studentId === listing?.sellerId));
 
   const handleAddToCart = () => {
     if (!listing) return;
@@ -244,7 +248,10 @@ export default function ListingDetailScreen() {
                   />
                   <View>
                     <Text style={[styles.sellerName, { color: colors.textPrimary }]}>
-                      {listing.sellerName}
+                      MSSV: {listing.sellerName || listing.sellerId}
+                      {isOwnListing ? (
+                        <Text style={{ color: colors.primary, fontWeight: '700' }}> (Bạn)</Text>
+                      ) : null}
                     </Text>
                     <Text style={[styles.sellerContact, { color: colors.textMuted }]}>
                       Địa điểm giao nhận: Khu A / Ký túc xá DNTU

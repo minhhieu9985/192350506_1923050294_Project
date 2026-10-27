@@ -136,8 +136,8 @@ export default function CreateListingModal() {
 
     createMutation.mutate(
       {
-        sellerId: currentUser?.id || 'user_demo',
-        sellerName: currentUser?.name || 'Sinh viên DNTU',
+        sellerId: currentUser?.id || 'user_seller_01',
+        sellerName: currentUser?.studentId || '23DTH102',
         title: title.trim(),
         description: description.trim() || 'Sách giáo trình / đồ dùng học tập sinh viên.',
         category,

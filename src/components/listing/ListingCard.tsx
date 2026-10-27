@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Listing } from '../../types';
+import { useAuthStore, selectCurrentUser } from '../../store/authStore';
 import { useTheme } from '../../hooks/useThemeColor';
 import { Accessibility, Radii, Spacing, Typography } from '../../constants/tokens';
 import { formatCurrency } from '../../utils/formatters';
@@ -31,9 +32,19 @@ export function ListingCard({
   style,
 }: ListingCardProps) {
   const { colors } = useTheme();
+  const currentUser = useAuthStore(selectCurrentUser);
   const isOutOfStock = listing.stock <= 0;
   const hasPriceDrop =
     listing.originalPrice && listing.originalPrice > listing.price;
+
+  // Check if current logged in student is the seller of this listing
+  const isOwnListing =
+    (currentUser?.id && currentUser.id === listing.sellerId) ||
+    (currentUser?.studentId &&
+      (currentUser.studentId === listing.sellerName ||
+        currentUser.studentId === listing.sellerId));
+
+  const sellerDisplay = listing.sellerName || listing.sellerId;
 
   return (
     <View
@@ -129,7 +140,10 @@ export function ListingCard({
           <Text
             numberOfLines={1}
             style={[styles.seller, { color: colors.textMuted }]}>
-            Người bán: {listing.sellerName}
+            Người bán: {sellerDisplay}
+            {isOwnListing ? (
+              <Text style={{ color: colors.primary, fontWeight: '700' }}> (Bạn)</Text>
+            ) : null}
           </Text>
         </TouchableOpacity>
 
