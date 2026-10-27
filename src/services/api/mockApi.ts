@@ -156,4 +156,12 @@ export const mockApi = {
     await saveStoredListings(currentListings);
     return currentListings[index];
   },
+
+  async deleteListing(listingId: string): Promise<boolean> {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const currentListings = await getStoredListings();
+    const updated = currentListings.filter((item) => item.id !== listingId);
+    await saveStoredListings(updated);
+    return true;
+  },
 };

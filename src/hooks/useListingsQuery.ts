@@ -46,3 +46,14 @@ export function useUpdateStockMutation() {
     },
   });
 }
+
+export function useDeleteListing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (listingId: string) => mockApi.deleteListing(listingId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LISTINGS_QUERY_KEY });
+    },
+  });
+}

@@ -12,7 +12,11 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useListingDetail, useUpdateStockMutation } from '../../hooks/useListingsQuery';
+import {
+  useListingDetail,
+  useUpdateStockMutation,
+  useDeleteListing,
+} from '../../hooks/useListingsQuery';
 import { useFavouritesStore } from '../../store/favouritesStore';
 import { useCartStore } from '../../store/cartStore';
 import { useAuthStore, selectCurrentUser } from '../../store/authStore';
@@ -30,6 +34,7 @@ export default function ListingDetailScreen() {
 
   const { data: listing, isLoading, isError, refetch } = useListingDetail(id);
   const updateStockMutation = useUpdateStockMutation();
+  const deleteListingMutation = useDeleteListing();
 
   const currentUser = useAuthStore(selectCurrentUser);
   const isFavourite = useFavouritesStore((s) => s.isFavourite(id));
@@ -71,6 +76,54 @@ export default function ListingDetailScreen() {
     if (!listing) return;
     setNewStockInput(String(listing.stock));
     setIsStockModalVisible(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!listing) return;
+
+    const performDelete = async () => {
+      try {
+        await deleteListingMutation.mutateAsync(listing.id);
+        if (Platform.OS === 'web') {
+          window.alert('Đã gỡ sản phẩm thành công!');
+        } else {
+          Alert.alert('Thành công', 'Đã gỡ sản phẩm khỏi hệ thống');
+        }
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/(tabs)');
+        }
+      } catch {
+        if (Platform.OS === 'web') {
+          window.alert('Lỗi: Không thể gỡ sản phẩm lúc này');
+        } else {
+          Alert.alert('Lỗi', 'Không thể gỡ sản phẩm lúc này, vui lòng thử lại');
+        }
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirmed = typeof window !== 'undefined'
+        ? window.confirm('Bạn có chắc chắn muốn gỡ sản phẩm này không?')
+        : true;
+      if (confirmed) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        'Xác nhận gỡ sản phẩm',
+        'Bạn có chắc chắn muốn gỡ sản phẩm này không?',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Đồng ý',
+            style: 'destructive',
+            onPress: performDelete,
+          },
+        ]
+      );
+    }
   };
 
   const handleSaveStock = async () => {
@@ -269,14 +322,25 @@ export default function ListingDetailScreen() {
                       : '★ Bạn đang xem dưới quyền Người bán (Seller)'}
                   </Text>
                   {isOwnListing ? (
-                    // Own listing: manage stock
-                    <AppButton
-                      title="Quản lý số lượng kho"
-                      onPress={handleOpenStockModal}
-                      variant="primary"
-                      style={styles.sellerBtn}
-                      icon={<MaterialIcons name="inventory" size={18} color={colors.primaryContrast} />}
-                    />
+                    // Own listing: manage stock & delete listing
+                    <View style={styles.sellerBtnsRow}>
+                      <AppButton
+                        title="Quản lý số lượng kho"
+                        onPress={handleOpenStockModal}
+                        variant="primary"
+                        style={styles.sellerBtn}
+                        icon={<MaterialIcons name="inventory" size={18} color={colors.primaryContrast} />}
+                      />
+                      <AppButton
+                        title="Gỡ sản phẩm"
+                        onPress={handleConfirmDelete}
+                        loading={deleteListingMutation.isPending}
+                        disabled={deleteListingMutation.isPending}
+                        variant="danger"
+                        style={styles.sellerBtn}
+                        icon={<MaterialIcons name="delete-outline" size={18} color={colors.dangerContrast} />}
+                      />
+                    </View>
                   ) : (
                     // Viewing another seller's listing: edit simulation
                     <AppButton
