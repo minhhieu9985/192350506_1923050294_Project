@@ -200,10 +200,13 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
     marginBottom: Spacing.lg,
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
   },
   imageContainer: {
     width: '100%',
-    aspectRatio: 4 / 3,
+    height: 200,
     position: 'relative',
     overflow: 'hidden',
     borderTopLeftRadius: Radii.xl,
@@ -212,6 +215,7 @@ const styles = StyleSheet.create({
   imageTouchable: {
     width: '100%',
     height: '100%',
+    overflow: 'hidden',
   },
   image: {
     width: '100%',

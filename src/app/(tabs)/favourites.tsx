@@ -64,5 +64,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: Spacing.lg,
+    maxWidth: 640,
+    width: '100%',
+    alignSelf: 'center',
   },
 });

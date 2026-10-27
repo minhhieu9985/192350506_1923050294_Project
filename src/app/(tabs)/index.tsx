@@ -236,6 +236,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
     paddingBottom: 90, // Leave room for FAB and TabBar
+    maxWidth: 640,
+    width: '100%',
+    alignSelf: 'center',
   },
   fab: {
     position: 'absolute',
