@@ -6,7 +6,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -44,18 +43,6 @@ export default function SignInScreen() {
     setEmail('');
     setStudentId('');
     router.replace('/(tabs)');
-  };
-
-  const handleQuickDemo = async (role: 'buyer' | 'seller') => {
-    setErrorMsg(null);
-    await signIn(role);
-    setEmail('');
-    setStudentId('');
-    Alert.alert(
-      'Đăng nhập thành công',
-      `Chào mừng bạn đăng nhập với vai trò: ${role === 'seller' ? 'Người bán (Seller - 23DTH102)' : 'Sinh viên mua (Buyer - 23DTH101)'}`,
-      [{ text: 'Vào ứng dụng', onPress: () => router.replace('/(tabs)') }]
-    );
   };
 
   return (
@@ -121,30 +108,6 @@ export default function SignInScreen() {
               variant="primary"
               style={styles.submitBtn}
             />
-
-            {/* Quick Demo Login for Examiner Viva */}
-            <View style={styles.dividerContainer}>
-              <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-              <Text style={[styles.dividerText, { color: colors.textMuted }]}>
-                HOẶC CHỌN TÀI KHOẢN TEST VIVA
-              </Text>
-              <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-            </View>
-
-            <View style={styles.demoButtonsRow}>
-              <AppButton
-                title="Demo: Sinh viên Mua (Buyer)"
-                onPress={() => handleQuickDemo('buyer')}
-                variant="outline"
-                style={styles.demoBtn}
-              />
-              <AppButton
-                title="Demo: Sinh viên Bán (Seller)"
-                onPress={() => handleQuickDemo('seller')}
-                variant="secondary"
-                style={styles.demoBtn}
-              />
-            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -202,24 +165,5 @@ const styles = StyleSheet.create({
   },
   submitBtn: {
     marginTop: Spacing.sm,
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: Spacing.md,
-    gap: Spacing.sm,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    ...Typography.small,
-  },
-  demoButtonsRow: {
-    gap: Spacing.sm,
-  },
-  demoBtn: {
-    width: '100%',
   },
 });

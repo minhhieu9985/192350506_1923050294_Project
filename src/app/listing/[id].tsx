@@ -7,6 +7,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Modal,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -14,9 +16,9 @@ import { useListingDetail, useUpdateStockMutation } from '../../hooks/useListing
 import { useFavouritesStore } from '../../store/favouritesStore';
 import { useCartStore } from '../../store/cartStore';
 import { useAuthStore, selectCurrentUser } from '../../store/authStore';
-import { notificationService } from '../../services/notifications';
 import { StateView } from '../../components/common/StateView';
 import { AppButton } from '../../components/common/AppButton';
+import { AppInput } from '../../components/common/AppInput';
 import { useTheme } from '../../hooks/useThemeColor';
 import { formatCurrency, formatTimeAgo } from '../../utils/formatters';
 import { Accessibility, Radii, Spacing, Typography } from '../../constants/tokens';
@@ -35,6 +37,8 @@ export default function ListingDetailScreen() {
   const addItem = useCartStore((s) => s.addItem);
 
   const [quantityToAdd, setQuantityToAdd] = useState(1);
+  const [isStockModalVisible, setIsStockModalVisible] = useState(false);
+  const [newStockInput, setNewStockInput] = useState('');
 
   // Refined role-based logic
   const isSeller = currentUser?.role === 'seller';
@@ -48,58 +52,53 @@ export default function ListingDetailScreen() {
     if (!listing) return;
     const success = addItem(listing, quantityToAdd);
     if (success) {
-      Alert.alert(
-        'Đã thêm vào giỏ',
-        `Đã thêm ${quantityToAdd} cuốn/sản phẩm vào giỏ hàng.`,
-        [
-          { text: 'Tiếp tục xem' },
-          { text: 'Đến giỏ hàng', onPress: () => router.push('/(tabs)/cart') },
-        ]
-      );
+      if (Platform.OS === 'web') {
+        window.alert(`Đã thêm ${quantityToAdd} sản phẩm vào giỏ hàng!`);
+      } else {
+        Alert.alert(
+          'Đã thêm vào giỏ',
+          `Đã thêm ${quantityToAdd} cuốn/sản phẩm vào giỏ hàng.`,
+          [
+            { text: 'Tiếp tục xem' },
+            { text: 'Đến giỏ hàng', onPress: () => router.push('/(tabs)/cart') },
+          ]
+        );
+      }
     }
   };
 
-  const handleSimulatePriceDrop = async () => {
+  const handleOpenStockModal = () => {
     if (!listing) return;
-    const oldPrice = listing.price;
-    const newPrice = Math.round(oldPrice * 0.8); // 20% drop
-    await notificationService.triggerPriceDropNotification(
-      listing.title,
-      oldPrice,
-      newPrice
-    );
-    Alert.alert(
-      'Mô phỏng Price Drop',
-      `Đã phát local notification: "${listing.title}" giảm từ ${formatCurrency(oldPrice)} xuống ${formatCurrency(newPrice)}!`
-    );
+    setNewStockInput(String(listing.stock));
+    setIsStockModalVisible(true);
   };
 
-  const handleManageStock = () => {
+  const handleSaveStock = async () => {
     if (!listing) return;
-    if (Alert.prompt) {
-      Alert.prompt(
-        'Cập nhật tồn kho (Dành cho Người bán)',
-        `Tồn kho hiện tại: ${listing.stock}. Nhập số lượng mới:`,
-        [
-          { text: 'Hủy', style: 'cancel' },
-          {
-            text: 'Lưu',
-            onPress: (val?: string) => {
-              const num = parseInt(val || '0', 10);
-              if (!isNaN(num) && num >= 0) {
-                updateStockMutation.mutate({ id: listing.id, stock: num });
-              }
-            },
-          },
-        ],
-        'plain-text',
-        String(listing.stock)
-      );
-    } else {
-      Alert.alert(
-        'Quản lý tồn kho',
-        'Bạn đang xem dưới vai trò Người bán (Seller). Bạn có toàn quyền sửa tin đăng này.'
-      );
+    const num = parseInt(newStockInput.trim(), 10);
+    if (isNaN(num) || num < 0) {
+      if (Platform.OS === 'web') {
+        window.alert('Vui lòng nhập số lượng hợp lệ (lớn hơn hoặc bằng 0)');
+      } else {
+        Alert.alert('Số lượng không hợp lệ', 'Vui lòng nhập số lượng >= 0');
+      }
+      return;
+    }
+
+    try {
+      await updateStockMutation.mutateAsync({ id: listing.id, stock: num });
+      setIsStockModalVisible(false);
+      if (Platform.OS === 'web') {
+        window.alert(`Cập nhật thành công! Tồn kho hiện tại: ${num}`);
+      } else {
+        Alert.alert('Thành công', `Đã cập nhật số lượng tồn kho thành: ${num}`);
+      }
+    } catch {
+      if (Platform.OS === 'web') {
+        window.alert('Lỗi cập nhật tồn kho, vui lòng thử lại.');
+      } else {
+        Alert.alert('Lỗi', 'Không thể cập nhật số lượng kho.');
+      }
     }
   };
 
@@ -270,33 +269,28 @@ export default function ListingDetailScreen() {
                       : '★ Bạn đang xem dưới quyền Người bán (Seller)'}
                   </Text>
                   {isOwnListing ? (
-                    // Own listing: manage stock + price-drop notification
-                    <View style={styles.sellerBtnsRow}>
-                      <AppButton
-                        title="Quản lý số lượng kho"
-                        onPress={handleManageStock}
-                        variant="primary"
-                        style={styles.sellerBtn}
-                        icon={<MaterialIcons name="inventory" size={18} color={colors.primaryContrast} />}
-                      />
-                      <AppButton
-                        title="Test Price Drop Notification"
-                        onPress={handleSimulatePriceDrop}
-                        variant="outline"
-                        style={styles.sellerBtn}
-                        icon={<MaterialIcons name="notifications-active" size={18} color={colors.primary} />}
-                      />
-                    </View>
+                    // Own listing: manage stock
+                    <AppButton
+                      title="Quản lý số lượng kho"
+                      onPress={handleOpenStockModal}
+                      variant="primary"
+                      style={styles.sellerBtn}
+                      icon={<MaterialIcons name="inventory" size={18} color={colors.primaryContrast} />}
+                    />
                   ) : (
                     // Viewing another seller's listing: edit simulation
                     <AppButton
                       title="Quản lý / Chỉnh sửa tin đăng"
-                      onPress={() =>
-                        Alert.alert(
-                          'Chỉnh sửa tin đăng',
-                          'Tính năng chỉnh sửa tin đăng của người khác chỉ khả dụng với Admin.'
-                        )
-                      }
+                      onPress={() => {
+                        if (Platform.OS === 'web') {
+                          window.alert('Tính năng chỉnh sửa tin đăng của người khác chỉ khả dụng với Admin.');
+                        } else {
+                          Alert.alert(
+                            'Chỉnh sửa tin đăng',
+                            'Tính năng chỉnh sửa tin đăng của người khác chỉ khả dụng với Admin.'
+                          );
+                        }
+                      }}
                       variant="outline"
                       style={styles.sellerBtn}
                       icon={<MaterialIcons name="edit" size={18} color={colors.primary} />}
@@ -351,6 +345,56 @@ export default function ListingDetailScreen() {
           </ScrollView>
         ) : null}
       </StateView>
+
+      {/* Seller Stock Management Modal */}
+      <Modal
+        visible={isStockModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsStockModalVisible(false)}>
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+          <View
+            style={[
+              styles.modalCard,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}>
+            <View style={styles.modalHeader}>
+              <MaterialIcons name="inventory" size={24} color={colors.primary} />
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                Cập nhật số lượng kho
+              </Text>
+            </View>
+
+            <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+              Nhập số lượng tồn kho mới cho: {listing?.title}
+            </Text>
+
+            <AppInput
+              label="Số lượng tồn kho mới (*)"
+              value={newStockInput}
+              onChangeText={setNewStockInput}
+              keyboardType="numeric"
+              placeholder="0"
+            />
+
+            <View style={styles.modalBtnsRow}>
+              <AppButton
+                title="Hủy bỏ"
+                onPress={() => setIsStockModalVisible(false)}
+                variant="outline"
+                style={styles.modalBtn}
+              />
+              <AppButton
+                title="Lưu số lượng"
+                onPress={handleSaveStock}
+                loading={updateStockMutation.isPending}
+                variant="primary"
+                style={styles.modalBtn}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -515,5 +559,42 @@ const styles = StyleSheet.create({
   },
   addToCartBtn: {
     width: '100%',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 400,
+    padding: Spacing.xl,
+    borderRadius: Radii.xl,
+    borderWidth: 1,
+    gap: Spacing.md,
+    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  modalTitle: {
+    ...Typography.h3,
+  },
+  modalSubtitle: {
+    ...Typography.small,
+  },
+  modalBtnsRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginTop: Spacing.xs,
+  },
+  modalBtn: {
+    flex: 1,
   },
 });
