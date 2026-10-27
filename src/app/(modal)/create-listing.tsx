@@ -113,29 +113,42 @@ export default function CreateListingModal() {
     }
   };
 
+  const showAlert = (titleText: string, messageText: string, onOk?: () => void) => {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') {
+        window.alert(`[Campus Marketplace] ${titleText}\n\n${messageText}`);
+      }
+      if (onOk) onOk();
+    } else {
+      Alert.alert(titleText, messageText, [
+        { text: 'Đóng', onPress: onOk },
+      ]);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên sách hoặc đồ dùng');
+      showAlert('Lỗi', 'Vui lòng kiểm tra lại thông tin: Bạn chưa nhập tên sách hoặc đồ dùng.');
       return;
     }
     const numPrice = parseInt(price.replace(/[^0-9]/g, ''), 10);
     if (isNaN(numPrice) || numPrice <= 0) {
-      Alert.alert('Giá không hợp lệ', 'Vui lòng nhập giá bán lớn hơn 0');
+      showAlert('Lỗi', 'Vui lòng kiểm tra lại thông tin: Giá bán phải lớn hơn 0.');
       return;
     }
     const numStock = parseInt(stock.replace(/[^0-9]/g, ''), 10);
     if (isNaN(numStock) || numStock <= 0) {
-      Alert.alert('Số lượng không hợp lệ', 'Vui lòng nhập số lượng tồn kho hợp lệ');
+      showAlert('Lỗi', 'Vui lòng kiểm tra lại thông tin: Số lượng tồn kho không hợp lệ.');
       return;
     }
 
     if (!selectedImageUri) {
-      Alert.alert('Chưa có ảnh', 'Yêu cầu bắt buộc ít nhất một ảnh sản phẩm');
+      showAlert('Lỗi', 'Vui lòng kiểm tra lại thông tin: Bạn phải chọn hoặc chụp ít nhất 1 ảnh sản phẩm.');
       return;
     }
 
-    createMutation.mutate(
-      {
+    try {
+      await createMutation.mutateAsync({
         sellerId: currentUser?.id || 'user_seller_01',
         sellerName: currentUser?.studentId || '23DTH102',
         title: title.trim(),
@@ -146,18 +159,22 @@ export default function CreateListingModal() {
         photoUri: selectedImageUri,
         compressedSizeKb: compressionResult?.compressedSizeKb,
         originalSizeKb: compressionResult?.originalSizeKb,
-      },
-      {
-        onSuccess: () => {
-          Alert.alert('Thành công', 'Tin đăng đã được tải lên thành công!', [
-            { text: 'Đóng', onPress: () => router.back() },
-          ]);
-        },
-        onError: () => {
-          Alert.alert('Lỗi', 'Không thể đăng tin, vui lòng thử lại');
-        },
-      }
-    );
+      });
+
+      console.log('Listing created successfully! Closing modal and returning...');
+
+      showAlert('Thành công', 'Đăng tin thành công! Sản phẩm của bạn đã sẵn sàng trên chợ Campus.', () => {
+        // Safely dismiss modal or navigate back
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/(tabs)');
+        }
+      });
+    } catch (err) {
+      console.error('Create listing failed:', err);
+      showAlert('Lỗi', 'Không thể đăng tin lúc này, vui lòng thử lại.');
+    }
   };
 
   return (
