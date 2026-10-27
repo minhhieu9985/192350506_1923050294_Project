@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../hooks/useThemeColor';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore, selectCurrentUser, selectIsAuthLoading } from '../store/authStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,11 +25,31 @@ const asyncStoragePersister = createAsyncStoragePersister({
 
 export default function RootLayout() {
   const { isDark, colors } = useTheme();
+  const router = useRouter();
+  const segments = useSegments();
   const initSession = useAuthStore((s) => s.initSession);
+  const user = useAuthStore(selectCurrentUser);
+  const isAuthLoading = useAuthStore(selectIsAuthLoading);
 
   useEffect(() => {
     initSession();
   }, [initSession]);
+
+  // Auth Guard: ensure unauthenticated users are forced to /sign-in,
+  // while authenticated users entering /sign-in are redirected to /(tabs).
+  useEffect(() => {
+    if (isAuthLoading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!user && !inAuthGroup) {
+      console.log('Auth Guard: No active user, redirecting to /sign-in');
+      router.replace('/(auth)/sign-in');
+    } else if (user && inAuthGroup) {
+      console.log('Auth Guard: User authenticated, redirecting to /(tabs)');
+      router.replace('/(tabs)');
+    }
+  }, [user, isAuthLoading, segments, router]);
 
   return (
     <PersistQueryClientProvider

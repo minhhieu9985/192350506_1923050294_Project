@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, UserRole } from '../types';
 import { secureStorage } from '../services/secureStorage';
 
@@ -68,6 +69,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     set({ isLoading: true });
     await secureStorage.clearSession();
+    // Also clear any cached user session in AsyncStorage for extra redundancy
+    try {
+      await AsyncStorage.removeItem('campus_marketplace_session_token');
+      await AsyncStorage.removeItem('campus_marketplace_auth_user');
+    } catch {
+      // Ignore
+    }
     set({ user: null, isAuthenticated: false, isLoading: false, error: null });
     console.log('User signed out, state reset to null');
   },

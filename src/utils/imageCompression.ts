@@ -91,26 +91,36 @@ export async function compressListingImage(
     {
       compress: 0.7,
       format: ImageManipulator.SaveFormat.JPEG,
-      base64: false,
+      base64: true,
     }
   );
 
+  // Use Base64 data URI so images persist across web reload without blob expiry
+  const permanentUri = manipulated.base64
+    ? `data:image/jpeg;base64,${manipulated.base64}`
+    : manipulated.uri;
+
   // Estimate or fetch compressed size
-  let compressedBytes = Math.round(originalSizeBytes * 0.2); // Baseline fallback (approx 80% reduction)
-  try {
-    const response = await fetch(manipulated.uri);
-    const blob = await response.blob();
-    if (blob.size > 0) {
-      compressedBytes = blob.size;
+  let compressedBytes = Math.round(originalSizeBytes * 0.2); // Baseline fallback
+  if (manipulated.base64) {
+    // Base64 string length to raw bytes calculation: length * 3 / 4
+    compressedBytes = Math.round((manipulated.base64.length * 3) / 4);
+  } else {
+    try {
+      const response = await fetch(manipulated.uri);
+      const blob = await response.blob();
+      if (blob.size > 0) {
+        compressedBytes = blob.size;
+      }
+    } catch {
+      // Keep fallback estimate
     }
-  } catch {
-    // Keep fallback estimate if fetch blob is unsupported in environment
   }
 
   const savings = calculateSavings(originalSizeBytes, compressedBytes);
 
   return {
-    uri: manipulated.uri,
+    uri: permanentUri,
     width: manipulated.width,
     height: manipulated.height,
     originalSizeKb: Math.round(originalSizeBytes / 1024),
