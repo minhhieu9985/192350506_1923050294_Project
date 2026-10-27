@@ -75,7 +75,7 @@ export default function HomeScreen() {
       {/* Pull-to-refresh Last-updated Timestamp Banner */}
       <View style={[styles.metaHeader, { backgroundColor: colors.surfaceRaised }]}>
         <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-          Sinh viên: {currentUser?.name} ({currentUser?.role === 'seller' ? 'Người bán' : 'Tìm mua'})
+          MSSV: {currentUser?.studentId} ({currentUser?.role === 'seller' ? 'Người bán' : 'Tìm mua'})
         </Text>
         <Text style={[styles.metaText, { color: colors.textMuted }]}>
           Cập nhật: {lastUpdated}
@@ -134,28 +134,30 @@ export default function HomeScreen() {
               isFavourite={isFavourite(item.id)}
               onPress={() => router.push(`/listing/${item.id}`)}
               onToggleFavourite={() => toggleFavourite(item.id)}
-              onAddToCart={() => addItem(item, 1)}
+              onAddToCart={currentUser?.role === 'buyer' ? () => addItem(item, 1) : undefined}
             />
           )}
         />
       </StateView>
 
-      {/* Floating Action Button (FAB) to open Create Listing Modal */}
-      <TouchableOpacity
-        onPress={() => router.push('/(modal)/create-listing')}
-        accessible={true}
-        accessibilityRole="button"
-        accessibilityLabel="Đăng tin bán sách hoặc đồ dùng mới"
-        accessibilityHint="Mở biểu mẫu đăng bán"
-        style={[
-          styles.fab,
-          {
-            backgroundColor: colors.primary,
-            shadowColor: colors.cardShadow,
-          },
-        ]}>
-        <MaterialIcons name="add" size={28} color={colors.primaryContrast} />
-      </TouchableOpacity>
+      {/* Floating Action Button (FAB) — visible to Sellers to create new listings */}
+      {currentUser?.role === 'seller' && (
+        <TouchableOpacity
+          onPress={() => router.push('/(modal)/create-listing')}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Đăng tin bán sách hoặc đồ dùng mới"
+          accessibilityHint="Mở biểu mẫu đăng bán"
+          style={[
+            styles.fab,
+            {
+              backgroundColor: colors.primary,
+              shadowColor: colors.cardShadow,
+            },
+          ]}>
+          <MaterialIcons name="add" size={28} color={colors.primaryContrast} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

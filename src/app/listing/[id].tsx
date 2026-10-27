@@ -36,8 +36,9 @@ export default function ListingDetailScreen() {
 
   const [quantityToAdd, setQuantityToAdd] = useState(1);
 
-  // Check role: seller vs buyer
-  const isOwner = currentUser?.id === listing?.sellerId || currentUser?.role === 'seller';
+  // Refined role-based logic
+  const isSeller = currentUser?.role === 'seller';
+  const isOwnListing = currentUser?.id === listing?.sellerId;
 
   const handleAddToCart = () => {
     if (!listing) return;
@@ -253,28 +254,47 @@ export default function ListingDetailScreen() {
               </View>
 
               {/* SHOULD-HAVE: ROLE-BASED VIEW LOGIC */}
-              {isOwner ? (
-                // SELLER VIEW
+              {isSeller ? (
+                // SELLER VIEW (own listing OR viewing another's listing)
                 <View style={[styles.sellerActionCard, { backgroundColor: colors.warningMuted }]}>
                   <Text style={[styles.sellerRoleNotice, { color: colors.warning }]}>
-                    ★ Bạn đang xem dưới quyền Người bán (Seller)
+                    {isOwnListing
+                      ? '★ Đây là tin đăng của bạn (Seller)'
+                      : '★ Bạn đang xem dưới quyền Người bán (Seller)'}
                   </Text>
-                  <View style={styles.sellerBtnsRow}>
+                  {isOwnListing ? (
+                    // Own listing: manage stock + price-drop notification
+                    <View style={styles.sellerBtnsRow}>
+                      <AppButton
+                        title="Quản lý số lượng kho"
+                        onPress={handleManageStock}
+                        variant="primary"
+                        style={styles.sellerBtn}
+                        icon={<MaterialIcons name="inventory" size={18} color={colors.primaryContrast} />}
+                      />
+                      <AppButton
+                        title="Test Price Drop Notification"
+                        onPress={handleSimulatePriceDrop}
+                        variant="outline"
+                        style={styles.sellerBtn}
+                        icon={<MaterialIcons name="notifications-active" size={18} color={colors.primary} />}
+                      />
+                    </View>
+                  ) : (
+                    // Viewing another seller's listing: edit simulation
                     <AppButton
-                      title="Quản lý số lượng kho"
-                      onPress={handleManageStock}
-                      variant="primary"
-                      style={styles.sellerBtn}
-                      icon={<MaterialIcons name="inventory" size={18} color={colors.primaryContrast} />}
-                    />
-                    <AppButton
-                      title="Test Price Drop Notification"
-                      onPress={handleSimulatePriceDrop}
+                      title="Quản lý / Chỉnh sửa tin đăng"
+                      onPress={() =>
+                        Alert.alert(
+                          'Chỉnh sửa tin đăng',
+                          'Tính năng chỉnh sửa tin đăng của người khác chỉ khả dụng với Admin.'
+                        )
+                      }
                       variant="outline"
                       style={styles.sellerBtn}
-                      icon={<MaterialIcons name="notifications-active" size={18} color={colors.primary} />}
+                      icon={<MaterialIcons name="edit" size={18} color={colors.primary} />}
                     />
-                  </View>
+                  )}
                 </View>
               ) : (
                 // BUYER VIEW

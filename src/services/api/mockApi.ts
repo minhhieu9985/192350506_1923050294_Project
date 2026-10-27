@@ -4,7 +4,7 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   {
     id: '1',
     sellerId: 'user_seller_01',
-    sellerName: 'Nguyễn Hoàng Nam (K19-CNTT)',
+    sellerName: '23DTH102 (K19-CNTT)',
     title: 'Giáo trình Cấu trúc Dữ liệu & Giải thuật',
     description: 'Sách bìa mềm, còn mới 95%, không gạch xóa, tặng kèm tóm tắt ôn thi giữa kỳ.',
     category: 'Textbooks',
@@ -19,7 +19,7 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   {
     id: '2',
     sellerId: 'user_seller_02',
-    sellerName: 'Phạm Thị Thảo (K20-Kinh tế)',
+    sellerName: '23DTH201 (K20-Kinh tế)',
     title: 'Nguyên lý Kế toán (Tập 1 + 2)',
     description: 'Bộ sách dành cho sinh viên năm 1, có highlight các công thức quan trọng.',
     category: 'Textbooks',
@@ -33,7 +33,7 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   {
     id: '3',
     sellerId: 'user_seller_01',
-    sellerName: 'Nguyễn Hoàng Nam (K19-CNTT)',
+    sellerName: '23DTH102 (K19-CNTT)',
     title: 'Máy tính bỏ túi Casio fx-580VN X',
     description: 'Máy chính hãng Bitex, còn nguyên tem bảo hành, phím nảy êm, nắp còn mới.',
     category: 'Electronics',
@@ -48,7 +48,7 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   {
     id: '4',
     sellerId: 'user_seller_03',
-    sellerName: 'Trần Văn Hưng (K18-Điện tử)',
+    sellerName: '22DTH318 (K18-Điện tử)',
     title: 'Đèn bàn học tích điện LED chống cận',
     description: 'Đèn 3 chế độ sáng, pin dùng liên tục 6 tiếng trong KTX khi mất điện.',
     category: 'Dorm Essentials',
@@ -62,7 +62,7 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   {
     id: '5',
     sellerId: 'user_seller_04',
-    sellerName: 'Lê Thu Trang (K21-Ngoại ngữ)',
+    sellerName: '24DTH421 (K21-Ngoại ngữ)',
     title: 'Tập 5 cuốn sổ lò xo Klong Caro B5',
     description: 'Mua nhiều dùng không hết, giấy định lượng 100gsm chống thấm mực gel.',
     category: 'Stationery',
@@ -76,7 +76,7 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   {
     id: '6',
     sellerId: 'user_seller_01',
-    sellerName: 'Nguyễn Hoàng Nam (K19-CNTT)',
+    sellerName: '23DTH102 (K19-CNTT)',
     title: 'Bàn phím cơ DareU EK87 Tenkeyless',
     description: 'Switch Red gõ êm không ồn bạn cùng phòng trong ký túc xá, LED đỏ.',
     category: 'Electronics',

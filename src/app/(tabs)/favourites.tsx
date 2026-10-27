@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useListings } from '../../hooks/useListingsQuery';
 import { useFavouritesStore } from '../../store/favouritesStore';
 import { useCartStore } from '../../store/cartStore';
+import { useAuthStore, selectCurrentUser } from '../../store/authStore';
 import { ListingCard } from '../../components/listing/ListingCard';
 import { StateView } from '../../components/common/StateView';
 import { useTheme } from '../../hooks/useThemeColor';
@@ -17,6 +18,7 @@ export default function FavouritesScreen() {
   const favouriteIds = useFavouritesStore((s) => s.favouriteIds);
   const toggleFavourite = useFavouritesStore((s) => s.toggleFavourite);
   const addItem = useCartStore((s) => s.addItem);
+  const currentUser = useAuthStore(selectCurrentUser);
 
   // Filter listings based on favourited IDs
   const favouritedListings = useMemo(() => {
@@ -47,7 +49,7 @@ export default function FavouritesScreen() {
               isFavourite={true}
               onPress={() => router.push(`/listing/${item.id}`)}
               onToggleFavourite={() => toggleFavourite(item.id)}
-              onAddToCart={() => addItem(item, 1)}
+              onAddToCart={currentUser?.role === 'buyer' ? () => addItem(item, 1) : undefined}
             />
           )}
         />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { Alert, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useThemeColor';
 import { useCartStore, selectCartItemCount } from '../../store/cartStore';
@@ -16,7 +16,20 @@ export default function TabsLayout() {
   const signOut = useAuthStore((s) => s.signOut);
 
   const handleRoleToggle = () => {
-    switchRole();
+    const currentRole = currentUser?.role ?? 'buyer';
+    const nextRole = currentRole === 'buyer' ? 'Người bán (Seller)' : 'Người mua (Buyer)';
+    const mssv = currentUser?.studentId ?? '';
+    Alert.alert(
+      'Chuyển đổi vai trò',
+      `MSSV: ${mssv}\nVai trò hiện tại: ${currentRole === 'buyer' ? 'Người mua (Buyer)' : 'Người bán (Seller)'}\n\nBạn muốn chuyển sang ${nextRole}?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: `Chuyển sang ${nextRole}`,
+          onPress: () => switchRole(),
+        },
+      ]
+    );
   };
 
   const handleSignOut = async () => {
