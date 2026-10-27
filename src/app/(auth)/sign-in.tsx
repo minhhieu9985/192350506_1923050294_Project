@@ -6,6 +6,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -32,6 +33,20 @@ export default function SignInScreen() {
       setErrorMsg('Vui lòng nhập Mã số sinh viên (MSSV)');
       return;
     }
+
+    // Validation: MSSV phải là dãy số
+    const isDigitsOnly = /^[0-9]+$/.test(cleanStudentId);
+    if (!isDigitsOnly) {
+      const msg = 'Mã số sinh viên phải là dãy số.';
+      setErrorMsg(msg);
+      if (Platform.OS === 'web') {
+        window.alert(`[Campus Marketplace] Lỗi\n\n${msg}`);
+      } else {
+        Alert.alert('Lỗi', msg);
+      }
+      return;
+    }
+
     setErrorMsg(null);
     console.log('Manual Sign-in with MSSV:', cleanStudentId, 'Email:', email);
     await signIn({
@@ -87,7 +102,7 @@ export default function SignInScreen() {
               label="Email trường (@dntu.edu.vn)"
               value={email}
               onChangeText={setEmail}
-              placeholder="mssv@dntu.edu.vn"
+              placeholder="VD: 1923050506@dntu.edu.vn"
               keyboardType="email-address"
               autoCapitalize="none"
               error={errorMsg ?? undefined}
@@ -97,8 +112,9 @@ export default function SignInScreen() {
               label="Mã số sinh viên (MSSV)"
               value={studentId}
               onChangeText={setStudentId}
-              placeholder="VD: 23DTH101"
-              autoCapitalize="characters"
+              placeholder="VD: 1923050506"
+              keyboardType="numeric"
+              autoCapitalize="none"
             />
 
             <AppButton
