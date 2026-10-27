@@ -94,6 +94,26 @@
 
 ---
 
+### Giai đoạn 7: Fix Lỗi Lặp Vô Hạn Selector Zustand (Maximum update depth exceeded)
+- **Vấn đề phát hiện tại `/cart` trên Web**:
+  - Khi truy cập route `/cart`, trình duyệt ném lỗi: `Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate...`.
+  - **Nguyên nhân chính xác**:
+    - Trong `src/store/cartStore.ts`, hàm selector `selectCartSummary` được định nghĩa là: `(state) => calculateOrderSummary(state.items)`.
+    - Hàm `calculateOrderSummary` luôn trả về một object mới `{ itemCount, subtotal, deliveryFee, total, ... }` trên mỗi lần chạy.
+    - Trong React 18/19 và Zustand v5, cơ chế `useSyncExternalStore` so sánh tham chiếu (`Object.is(prev, next)`). Do mỗi lần selector được gọi đều trả về một tham chiếu object mới, React lầm tưởng state luôn thay đổi và liên tục kích hoạt re-render vô tận.
+- **Giải pháp xử lý triệt để**:
+  - Xóa bỏ `selectCartSummary` khỏi selector trực tiếp của Zustand.
+  - Tại màn hình [cart.tsx](file:///d:/laptrinhmobile/tuan10/Campus_Marketplace/src/app/(tabs)/cart.tsx), chỉ lấy mảng `cartItems = useCartStore(selectCartItems)` (tham chiếu mảng ổn định).
+  - Tính toán `summary` trong lúc render bằng `useMemo`: `const summary = useMemo(() => calculateOrderSummary(cartItems), [cartItems]);`.
+  - Khi đó, `summary` chỉ được tính toán lại khi mảng `cartItems` thực sự thay đổi (khi thêm, bớt hoặc đổi số lượng), chấm dứt hoàn toàn vòng lặp vô hạn.
+- **Kết quả xác minh**:
+  - Truy cập route `/cart` trên trình duyệt tải ngay lập tức, mượt mà và không còn hiện tượng render lặp.
+  - `npx tsc --noEmit`: 0 lỗi.
+  - `npm run lint`: 0 lỗi, 0 warnings.
+  - `npm test`: 18/18 tests passed.
+
+---
+
 ## 3. Tổng kết Đánh giá Sử dụng AI
 - **Điểm mạnh của AI**: Hỗ trợ viết boilerplate nhanh, tính toán toán học chính xác (ka-tex, color contrast, aspect ratio ratio), scaffold cấu trúc dự án chuẩn chỉ.
 - **Điểm cần lưu ý**: Cần giám sát chặt chẽ các thay đổi API của Expo/React Native (như React 19 async render trong testing, native module mocks trong Jest), đồng thời kiên quyết từ chối mã màu hex trực tiếp để tuân thủ 100% tiêu chí chấm điểm của giảng viên.

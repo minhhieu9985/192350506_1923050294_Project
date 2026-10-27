@@ -1,11 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CartItem, Listing, OrderSummary } from '../types';
-import {
-  calculateOrderSummary,
-  validateStockAddition,
-} from '../utils/cartCalculations';
+import { CartItem, Listing } from '../types';
+import { validateStockAddition } from '../utils/cartCalculations';
 
 interface CartState {
   items: CartItem[];
@@ -119,6 +116,4 @@ export const useCartStore = create<CartState>()(
 export const selectCartItems = (state: CartState) => state.items;
 export const selectCartItemCount = (state: CartState) =>
   state.items.reduce((acc, item) => acc + item.quantity, 0);
-export const selectCartSummary = (state: CartState): OrderSummary =>
-  calculateOrderSummary(state.items);
 export const selectCartFeedback = (state: CartState) => state.feedbackMessage;

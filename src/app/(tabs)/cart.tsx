@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,9 +13,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import {
   useCartStore,
   selectCartItems,
-  selectCartSummary,
   selectCartFeedback,
 } from '../../store/cartStore';
+import { calculateOrderSummary } from '../../utils/cartCalculations';
 import { StateView } from '../../components/common/StateView';
 import { AppButton } from '../../components/common/AppButton';
 import { useTheme } from '../../hooks/useThemeColor';
@@ -27,11 +27,13 @@ export default function CartScreen() {
   const { colors } = useTheme();
 
   const cartItems = useCartStore(selectCartItems);
-  const summary = useCartStore(selectCartSummary);
   const feedbackMessage = useCartStore(selectCartFeedback);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const clearCart = useCartStore((s) => s.clearCart);
+
+  // Compute summary during render with useMemo to avoid recreating object references in Zustand selector
+  const summary = useMemo(() => calculateOrderSummary(cartItems), [cartItems]);
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
