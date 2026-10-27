@@ -122,7 +122,7 @@ Mọi màn hình đều được bọc bởi component `StateView` để xử l�
 
 ---
 
-## 7. Hướng dẫn Test Nhanh Buổi Bảo Vệ (Viva Demonstration)
+## 7. Hướng dẫn Test Nhanh
 
 1. **Test Đăng nhập & Auth Guard**:
    - Nhập MSSV 10 chữ số thực tế (ví dụ: `1923050506`) và bấm **Đăng nhập**.
