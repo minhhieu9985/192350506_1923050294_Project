@@ -80,6 +80,20 @@
 
 ---
 
+### Giai đoạn 6: Kiểm thử Web Platform & Fix Lỗi Lồng Thẻ (<button> nested <button>)
+- **Vấn đề phát hiện khi chạy thực tế trên Web**:
+  - Khi chạy `npx expo start --web`, trình duyệt hiển thị lỗi: `Console Error: <button> cannot contain a nested <button>`.
+  - **Nguyên nhân**: React Native Web chuyển đổi các component có `onPress` hoặc `accessibilityRole="button"` thành thẻ HTML `<button>`. Trong `ListingCard.tsx`, cả thẻ Card bên ngoài được bọc bằng `<TouchableOpacity>` và bên trong lại chứa nút Favorite và nút Add to Cart (cũng là `<TouchableOpacity>`), dẫn đến việc một thẻ `<button>` bị lồng bên trong một thẻ `<button>` khác, vi phạm tiêu chuẩn HTML5.
+- **Giải pháp xử lý triệt để**:
+  - Đổi thẻ bọc ngoài cùng của `ListingCard` thành `<View>`.
+  - Tách vùng xem chi tiết (ảnh bìa, tiêu đề, giá) và các nút tương tác nhanh (nút Thích, nút Thêm vào giỏ) thành các phần tử anh em (**siblings**), không bọc lồng nhau.
+  - Thêm `pointerEvents="none"` cho các badge overlay thông tin.
+- **Kết quả xác minh**:
+  - Giao diện trên nền tảng Web hiển thị mượt mà, không còn bất kỳ lỗi console log nào.
+  - Cả 18 bài test tự động (`npm test`), `npx tsc --noEmit` và `npm run lint` đạt 0 lỗi 100%.
+
+---
+
 ## 3. Tổng kết Đánh giá Sử dụng AI
 - **Điểm mạnh của AI**: Hỗ trợ viết boilerplate nhanh, tính toán toán học chính xác (ka-tex, color contrast, aspect ratio ratio), scaffold cấu trúc dự án chuẩn chỉ.
 - **Điểm cần lưu ý**: Cần giám sát chặt chẽ các thay đổi API của Expo/React Native (như React 19 async render trong testing, native module mocks trong Jest), đồng thời kiên quyết từ chối mã màu hex trực tiếp để tuân thủ 100% tiêu chí chấm điểm của giảng viên.
