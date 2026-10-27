@@ -16,7 +16,6 @@ export default function FavouritesScreen() {
   const { data: listings, isLoading, isError, refetch } = useListings();
 
   const favouriteIds = useFavouritesStore((s) => s.favouriteIds);
-  const toggleFavourite = useFavouritesStore((s) => s.toggleFavourite);
   const addItem = useCartStore((s) => s.addItem);
   const currentUser = useAuthStore(selectCurrentUser);
 
@@ -46,9 +45,7 @@ export default function FavouritesScreen() {
           renderItem={({ item }) => (
             <ListingCard
               listing={item}
-              isFavourite={true}
               onPress={() => router.push(`/listing/${item.id}`)}
-              onToggleFavourite={() => toggleFavourite(item.id)}
               onAddToCart={currentUser?.role === 'buyer' ? () => addItem(item, 1) : undefined}
             />
           )}

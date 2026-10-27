@@ -11,21 +11,22 @@ interface FavouritesState {
 
 export const useFavouritesStore = create<FavouritesState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       favouriteIds: ['1', '3'], // Initial mock favourites for demo
 
       toggleFavourite: (listingId: string) => {
-        const current = get().favouriteIds;
-        const exists = current.includes(listingId);
-        if (exists) {
-          set({ favouriteIds: current.filter((id) => id !== listingId) });
-        } else {
-          set({ favouriteIds: [...current, listingId] });
-        }
+        set((state) => {
+          const exists = state.favouriteIds.includes(listingId);
+          return {
+            favouriteIds: exists
+              ? state.favouriteIds.filter((id) => id !== listingId)
+              : [...state.favouriteIds, listingId],
+          };
+        });
       },
 
       isFavourite: (listingId: string) => {
-        return get().favouriteIds.includes(listingId);
+        return false;
       },
 
       clearFavourites: () => {

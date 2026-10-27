@@ -4,18 +4,18 @@ import { User, UserRole } from '../types';
 import { secureStorage } from '../services/secureStorage';
 
 export const DEMO_BUYER: User = {
-  id: 'user_23dth101',
-  name: '23DTH101',
-  email: '23dth101@dntu.edu.vn',
-  studentId: '23DTH101',
+  id: 'user_1923050101',
+  name: '1923050101',
+  email: '1923050101@dntu.edu.vn',
+  studentId: '1923050101',
   role: 'buyer',
 };
 
 export const DEMO_SELLER: User = {
   id: 'user_seller_01',
-  name: '23DTH102',
-  email: '23dth102@dntu.edu.vn',
-  studentId: '23DTH102',
+  name: '1923050102',
+  email: '1923050102@dntu.edu.vn',
+  studentId: '1923050102',
   role: 'seller',
 };
 

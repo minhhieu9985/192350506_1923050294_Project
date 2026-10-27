@@ -10,7 +10,7 @@ jest.mock('@expo/vector-icons', () => ({
 const mockListing: Listing = {
   id: 'test_1',
   sellerId: 's1',
-  sellerName: '23DTH102',
+  sellerName: '1923050102',
   title: 'Giáo trình Giải tích 1',
   description: 'Tình trạng còn rất mới',
   category: 'Textbooks',
@@ -28,7 +28,7 @@ describe('Component Test: ListingCard', () => {
 
     expect(screen.getByText('Giáo trình Giải tích 1')).toBeTruthy();
     expect(screen.getByText('Textbooks')).toBeTruthy();
-    expect(screen.getByText(/23DTH102/)).toBeTruthy();
+    expect(screen.getByText(/1923050102/)).toBeTruthy();
     expect(screen.getByText('50.000 đ')).toBeTruthy();
     expect(screen.getByText('70.000 đ')).toBeTruthy();
   });

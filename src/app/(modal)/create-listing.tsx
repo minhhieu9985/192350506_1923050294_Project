@@ -150,7 +150,7 @@ export default function CreateListingModal() {
     try {
       await createMutation.mutateAsync({
         sellerId: currentUser?.id || 'user_seller_01',
-        sellerName: currentUser?.studentId || '23DTH102',
+        sellerName: currentUser?.studentId || '1923050102',
         title: title.trim(),
         description: description.trim() || 'Sách giáo trình / đồ dùng học tập sinh viên.',
         category,

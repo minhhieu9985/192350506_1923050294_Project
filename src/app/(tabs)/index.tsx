@@ -14,7 +14,6 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useListings } from '../../hooks/useListingsQuery';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
-import { useFavouritesStore } from '../../store/favouritesStore';
 import { useCartStore } from '../../store/cartStore';
 import { useAuthStore, selectCurrentUser } from '../../store/authStore';
 import { ListingCard } from '../../components/listing/ListingCard';
@@ -32,8 +31,6 @@ export default function HomeScreen() {
   const { isOffline } = useNetworkStatus();
   const { data: listings, isLoading, isError, error, refetch, isRefetching } = useListings();
 
-  const isFavourite = useFavouritesStore((s) => s.isFavourite);
-  const toggleFavourite = useFavouritesStore((s) => s.toggleFavourite);
   const addItem = useCartStore((s) => s.addItem);
   const currentUser = useAuthStore(selectCurrentUser);
   const switchRole = useAuthStore((s) => s.switchRole);
@@ -179,9 +176,7 @@ export default function HomeScreen() {
           renderItem={({ item }) => (
             <ListingCard
               listing={item}
-              isFavourite={isFavourite(item.id)}
               onPress={() => router.push(`/listing/${item.id}`)}
-              onToggleFavourite={() => toggleFavourite(item.id)}
               onAddToCart={currentUser?.role === 'buyer' ? () => addItem(item, 1) : undefined}
             />
           )}

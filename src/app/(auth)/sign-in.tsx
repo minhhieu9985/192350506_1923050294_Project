@@ -102,7 +102,7 @@ export default function SignInScreen() {
               label="Email trường (@dntu.edu.vn)"
               value={email}
               onChangeText={setEmail}
-              placeholder="VD: 1923050506@dntu.edu.vn"
+              placeholder="VD: 1923050506@dntu.edu.vn|1923050294@dntu.edu.vn"
               keyboardType="email-address"
               autoCapitalize="none"
               error={errorMsg ?? undefined}
@@ -112,7 +112,7 @@ export default function SignInScreen() {
               label="Mã số sinh viên (MSSV)"
               value={studentId}
               onChangeText={setStudentId}
-              placeholder="VD: 1923050506"
+              placeholder="VD: 1923050506|1923050294"
               keyboardType="numeric"
               autoCapitalize="none"
             />

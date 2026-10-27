@@ -37,7 +37,7 @@ export default function ListingDetailScreen() {
   const deleteListingMutation = useDeleteListing();
 
   const currentUser = useAuthStore(selectCurrentUser);
-  const isFavourite = useFavouritesStore((s) => s.isFavourite(id));
+  const isFavourite = useFavouritesStore((s) => s.favouriteIds.includes(id));
   const toggleFavourite = useFavouritesStore((s) => s.toggleFavourite);
   const addItem = useCartStore((s) => s.addItem);
 

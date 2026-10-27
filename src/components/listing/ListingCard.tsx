@@ -10,6 +10,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { Listing } from '../../types';
 import { useAuthStore, selectCurrentUser } from '../../store/authStore';
+import { useFavouritesStore } from '../../store/favouritesStore';
 import { useTheme } from '../../hooks/useThemeColor';
 import { Accessibility, Radii, Spacing, Typography } from '../../constants/tokens';
 import { formatCurrency } from '../../utils/formatters';
@@ -25,14 +26,21 @@ export interface ListingCardProps {
 
 export function ListingCard({
   listing,
-  isFavourite = false,
+  isFavourite: propIsFavourite,
   onPress,
-  onToggleFavourite,
+  onToggleFavourite: propOnToggleFavourite,
   onAddToCart,
   style,
 }: ListingCardProps) {
   const { colors } = useTheme();
   const currentUser = useAuthStore(selectCurrentUser);
+
+  // Directly select isFavourite from Zustand to guarantee immediate reactive re-render
+  const isFavInStore = useFavouritesStore((state) => state.favouriteIds.includes(listing.id));
+  const storeToggleFavourite = useFavouritesStore((state) => state.toggleFavourite);
+
+  const isFavourite = propIsFavourite !== undefined ? propIsFavourite : isFavInStore;
+  const onToggleFavourite = propOnToggleFavourite || (() => storeToggleFavourite(listing.id));
   const isOutOfStock = listing.stock <= 0;
   const hasPriceDrop =
     listing.originalPrice && listing.originalPrice > listing.price;
@@ -140,7 +148,7 @@ export function ListingCard({
           <Text
             numberOfLines={1}
             style={[styles.seller, { color: colors.textMuted }]}>
-            Người bán: {sellerDisplay}
+            MSSV: {sellerDisplay}
             {isOwnListing ? (
               <Text style={{ color: colors.primary, fontWeight: '700' }}> (Bạn)</Text>
             ) : null}
