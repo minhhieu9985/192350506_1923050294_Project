@@ -36,13 +36,7 @@ export function ListingCard({
     listing.originalPrice && listing.originalPrice > listing.price;
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.88}
-      onPress={onPress}
-      accessible={true}
-      accessibilityRole="button"
-      accessibilityLabel={`Sách: ${listing.title}, giá: ${formatCurrency(listing.price)}, danh mục: ${listing.category}, ${isOutOfStock ? 'hết hàng' : `còn ${listing.stock} sản phẩm`}`}
-      accessibilityHint="Nhấn đúp để mở màn hình chi tiết sản phẩm"
+    <View
       style={[
         styles.card,
         {
@@ -54,22 +48,32 @@ export function ListingCard({
       ]}>
       {/* Photo Container */}
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: listing.photoUri }}
-          style={styles.image}
-          resizeMode="cover"
-          accessibilityLabel={`Ảnh bìa của ${listing.title}`}
-        />
+        {/* Clickable Image to view details (No nested buttons) */}
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={onPress}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={`Ảnh bìa: ${listing.title}`}
+          style={styles.imageTouchable}>
+          <Image
+            source={{ uri: listing.photoUri }}
+            style={styles.image}
+            resizeMode="cover"
+            accessibilityLabel={`Ảnh bìa của ${listing.title}`}
+          />
+        </TouchableOpacity>
 
         {/* Category Badge */}
         <View
-          style={[styles.categoryBadge, { backgroundColor: colors.overlay }]}>
+          style={[styles.categoryBadge, { backgroundColor: colors.overlay }]}
+          pointerEvents="none">
           <Text style={[styles.categoryText, { color: colors.primaryContrast }]}>
             {listing.category}
           </Text>
         </View>
 
-        {/* Favourite Button */}
+        {/* Favourite Button (Sibling to imageTouchable, NOT nested) */}
         {onToggleFavourite ? (
           <TouchableOpacity
             activeOpacity={0.7}
@@ -95,7 +99,9 @@ export function ListingCard({
 
         {/* Stock Badge if out of stock */}
         {isOutOfStock ? (
-          <View style={[styles.stockOverlay, { backgroundColor: colors.overlay }]}>
+          <View
+            style={[styles.stockOverlay, { backgroundColor: colors.overlay }]}
+            pointerEvents="none">
             <Text style={[styles.outOfStockText, { color: colors.dangerContrast }]}>
               Hết hàng
             </Text>
@@ -105,21 +111,37 @@ export function ListingCard({
 
       {/* Content Container */}
       <View style={styles.infoContainer}>
-        <Text
-          numberOfLines={2}
-          style={[styles.title, { color: colors.textPrimary }]}>
-          {listing.title}
-        </Text>
+        {/* Main Title & Seller Touchable (Navigates to detail) */}
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={onPress}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={`Sách: ${listing.title}, giá: ${formatCurrency(listing.price)}, danh mục: ${listing.category}, ${isOutOfStock ? 'hết hàng' : `còn ${listing.stock} sản phẩm`}`}
+          accessibilityHint="Nhấn đúp để mở màn hình chi tiết sản phẩm"
+          style={styles.textTouchable}>
+          <Text
+            numberOfLines={2}
+            style={[styles.title, { color: colors.textPrimary }]}>
+            {listing.title}
+          </Text>
 
-        <Text
-          numberOfLines={1}
-          style={[styles.seller, { color: colors.textMuted }]}>
-          Người bán: {listing.sellerName}
-        </Text>
+          <Text
+            numberOfLines={1}
+            style={[styles.seller, { color: colors.textMuted }]}>
+            Người bán: {listing.sellerName}
+          </Text>
+        </TouchableOpacity>
 
-        {/* Price & Actions Row */}
+        {/* Price & Actions Row (Siblings, NOT nested) */}
         <View style={styles.footerRow}>
-          <View>
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={onPress}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Giá: ${formatCurrency(listing.price)}`}
+            style={styles.priceContainer}>
             <Text style={[styles.price, { color: colors.accent }]}>
               {formatCurrency(listing.price)}
             </Text>
@@ -128,9 +150,9 @@ export function ListingCard({
                 {formatCurrency(listing.originalPrice)}
               </Text>
             ) : null}
-          </View>
+          </TouchableOpacity>
 
-          {/* Quick Add To Cart */}
+          {/* Quick Add To Cart Button (Sibling, NOT nested) */}
           {onAddToCart && !isOutOfStock ? (
             <TouchableOpacity
               onPress={onAddToCart}
@@ -150,7 +172,7 @@ export function ListingCard({
           ) : null}
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -170,6 +192,10 @@ const styles = StyleSheet.create({
     height: 180,
     position: 'relative',
   },
+  imageTouchable: {
+    width: '100%',
+    height: '100%',
+  },
   image: {
     width: '100%',
     height: '100%',
@@ -181,6 +207,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: 3,
     borderRadius: Radii.sm,
+    zIndex: 1,
   },
   categoryText: {
     ...Typography.small,
@@ -196,6 +223,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
+    zIndex: 2,
   },
   stockOverlay: {
     position: 'absolute',
@@ -205,6 +233,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 1,
   },
   outOfStockText: {
     ...Typography.bodyBold,
@@ -213,6 +242,9 @@ const styles = StyleSheet.create({
   infoContainer: {
     padding: Spacing.md,
     gap: Spacing.xs,
+  },
+  textTouchable: {
+    gap: 2,
   },
   title: {
     ...Typography.bodyBold,
@@ -225,6 +257,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: Spacing.xs,
+  },
+  priceContainer: {
+    justifyContent: 'center',
   },
   price: {
     ...Typography.h3,

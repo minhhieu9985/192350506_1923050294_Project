@@ -37,7 +37,7 @@ describe('Component Test: ListingCard', () => {
     const onPress = jest.fn();
     await render(<ListingCard listing={mockListing} onPress={onPress} />);
 
-    const cardButton = screen.getByRole('button', { name: /Giáo trình Giải tích 1/i });
+    const cardButton = screen.getByRole('button', { name: /Sách: Giáo trình Giải tích 1/i });
     fireEvent.press(cardButton);
     expect(onPress).toHaveBeenCalledTimes(1);
   });
