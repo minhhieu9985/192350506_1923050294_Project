@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Listing } from '../../types';
 
 export const INITIAL_MOCK_LISTINGS: Listing[] = [
@@ -89,18 +90,47 @@ export const INITIAL_MOCK_LISTINGS: Listing[] = [
   },
 ];
 
-let inMemoryListings: Listing[] = [...INITIAL_MOCK_LISTINGS];
+const STORAGE_KEY_LISTINGS = 'campus_marketplace_mock_listings';
 
-// Simulates network delay and server operations
+// Helper to get all listings from AsyncStorage with initial fallback
+async function getStoredListings(): Promise<Listing[]> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_LISTINGS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+    // Initialize storage with INITIAL_MOCK_LISTINGS on first launch
+    await AsyncStorage.setItem(STORAGE_KEY_LISTINGS, JSON.stringify(INITIAL_MOCK_LISTINGS));
+    return [...INITIAL_MOCK_LISTINGS];
+  } catch (err) {
+    console.error('Error reading listings from AsyncStorage:', err);
+    return [...INITIAL_MOCK_LISTINGS];
+  }
+}
+
+// Helper to write listings to AsyncStorage
+async function saveStoredListings(listings: Listing[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY_LISTINGS, JSON.stringify(listings));
+  } catch (err) {
+    console.error('Error saving listings to AsyncStorage:', err);
+  }
+}
+
+// Simulates network delay and server operations with AsyncStorage persistence
 export const mockApi = {
   async fetchListings(): Promise<Listing[]> {
     await new Promise((resolve) => setTimeout(resolve, 600)); // Simulate patchy wifi latency
-    return [...inMemoryListings];
+    return await getStoredListings();
   },
 
   async fetchListingById(id: string): Promise<Listing | null> {
     await new Promise((resolve) => setTimeout(resolve, 400));
-    const found = inMemoryListings.find((item) => item.id === id);
+    const listings = await getStoredListings();
+    const found = listings.find((item) => item.id === id);
     return found ? { ...found } : null;
   },
 
@@ -111,15 +141,19 @@ export const mockApi = {
       id: `listing_${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
-    inMemoryListings = [created, ...inMemoryListings];
+    const currentListings = await getStoredListings();
+    const updated = [created, ...currentListings];
+    await saveStoredListings(updated);
     return created;
   },
 
   async updateStock(id: string, newStock: number): Promise<Listing | null> {
     await new Promise((resolve) => setTimeout(resolve, 400));
-    const index = inMemoryListings.findIndex((item) => item.id === id);
+    const currentListings = await getStoredListings();
+    const index = currentListings.findIndex((item) => item.id === id);
     if (index === -1) return null;
-    inMemoryListings[index] = { ...inMemoryListings[index], stock: newStock };
-    return inMemoryListings[index];
+    currentListings[index] = { ...currentListings[index], stock: newStock };
+    await saveStoredListings(currentListings);
+    return currentListings[index];
   },
 };
