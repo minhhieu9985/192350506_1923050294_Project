@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   TextInput,
   Text,
@@ -21,25 +21,46 @@ export function AppInput({
   error,
   containerStyle,
   style,
+  onFocus,
+  onBlur,
   ...props
 }: AppInputProps) {
   const { colors } = useTheme();
+  const [isFocused, setIsFocused] = useState(false);
+
+  const getBorderColor = () => {
+    if (error) return colors.danger;
+    if (isFocused) return colors.primary;
+    return colors.border;
+  };
 
   return (
     <View style={[styles.container, containerStyle]}>
       <Text
-        style={[styles.label, { color: colors.textSecondary }]}
+        style={[
+          styles.label,
+          { color: isFocused ? colors.primary : colors.textSecondary },
+        ]}
         accessibilityRole="text">
         {label}
       </Text>
       <TextInput
         placeholderTextColor={colors.textMuted}
+        onFocus={(e) => {
+          setIsFocused(true);
+          if (onFocus) onFocus(e);
+        }}
+        onBlur={(e) => {
+          setIsFocused(false);
+          if (onBlur) onBlur(e);
+        }}
         style={[
           styles.input,
           {
             backgroundColor: colors.surface,
             color: colors.textPrimary,
-            borderColor: error ? colors.danger : colors.border,
+            borderColor: getBorderColor(),
+            borderWidth: isFocused ? 1.5 : 1,
           },
           style,
         ]}
@@ -66,10 +87,9 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: Accessibility.minTouchTarget,
-    borderWidth: 1,
-    borderRadius: Radii.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    borderRadius: Radii.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     ...Typography.body,
   },
   errorText: {

@@ -84,29 +84,29 @@ export function ListingCard({
           </Text>
         </View>
 
-        {/* Favourite Button (Sibling to imageTouchable, NOT nested) */}
-        {onToggleFavourite ? (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={onToggleFavourite}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isFavourite
-                ? `Bỏ thích ${listing.title}`
-                : `Thêm ${listing.title} vào mục yêu thích`
-            }
-            style={[
-              styles.favButton,
-              { backgroundColor: colors.surface },
-            ]}>
-            <MaterialIcons
-              name={isFavourite ? 'favorite' : 'favorite-border'}
-              size={22}
-              color={isFavourite ? colors.danger : colors.textSecondary}
-            />
-          </TouchableOpacity>
-        ) : null}
+          {/* Favourite Button (Sibling to imageTouchable, NOT nested) */}
+          {onToggleFavourite ? (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onToggleFavourite}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isFavourite
+                  ? `Bỏ thích ${listing.title}`
+                  : `Thêm ${listing.title} vào mục yêu thích`
+              }
+              style={[
+                styles.favButton,
+                { backgroundColor: colors.overlay },
+              ]}>
+              <MaterialIcons
+                name={isFavourite ? 'favorite' : 'favorite-border'}
+                size={22}
+                color={isFavourite ? colors.danger : colors.primaryContrast}
+              />
+            </TouchableOpacity>
+          ) : null}
 
         {/* Stock Badge if out of stock */}
         {isOutOfStock ? (
@@ -156,7 +156,7 @@ export function ListingCard({
             accessibilityRole="button"
             accessibilityLabel={`Giá: ${formatCurrency(listing.price)}`}
             style={styles.priceContainer}>
-            <Text style={[styles.price, { color: colors.accent }]}>
+            <Text style={[styles.price, { color: colors.primary }]}>
               {formatCurrency(listing.price)}
             </Text>
             {hasPriceDrop && listing.originalPrice ? (
@@ -192,19 +192,22 @@ export function ListingCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Radii.lg,
+    borderRadius: Radii.xl,
     borderWidth: 1,
     overflow: 'hidden',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-    marginBottom: Spacing.md,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 4,
+    marginBottom: Spacing.lg,
   },
   imageContainer: {
     width: '100%',
-    height: 180,
+    aspectRatio: 4 / 3,
     position: 'relative',
+    overflow: 'hidden',
+    borderTopLeftRadius: Radii.xl,
+    borderTopRightRadius: Radii.xl,
   },
   imageTouchable: {
     width: '100%',
@@ -219,13 +222,13 @@ const styles = StyleSheet.create({
     top: Spacing.sm,
     left: Spacing.sm,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
-    borderRadius: Radii.sm,
+    paddingVertical: 4,
+    borderRadius: Radii.full,
     zIndex: 1,
   },
   categoryText: {
     ...Typography.small,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   favButton: {
     position: 'absolute',
@@ -254,30 +257,33 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   infoContainer: {
-    padding: Spacing.md,
+    padding: Spacing.lg,
     gap: Spacing.xs,
   },
   textTouchable: {
-    gap: 2,
+    gap: Spacing.xs,
   },
   title: {
     ...Typography.bodyBold,
+    lineHeight: 22,
   },
   seller: {
     ...Typography.small,
+    marginTop: 2,
   },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: Spacing.xs,
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.xs,
   },
   priceContainer: {
     justifyContent: 'center',
   },
   price: {
     ...Typography.h3,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   oldPrice: {
     ...Typography.small,

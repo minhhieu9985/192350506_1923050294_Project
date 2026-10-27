@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
@@ -38,7 +38,7 @@ export function AppButton({
 }: AppButtonProps) {
   const { colors } = useTheme();
 
-  const getBackgroundColor = () => {
+  const getBackgroundColor = (pressed: boolean) => {
     if (disabled) return colors.border;
     switch (variant) {
       case 'primary':
@@ -48,7 +48,7 @@ export function AppButton({
       case 'danger':
         return colors.danger;
       case 'outline':
-        return 'transparent';
+        return pressed ? colors.primaryMuted : 'transparent';
     }
   };
 
@@ -74,21 +74,22 @@ export function AppButton({
   };
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
       accessible={true}
       accessibilityRole={'button' as AccessibilityRole}
       accessibilityLabel={accessibilityLabel || title}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: disabled || loading, busy: loading }}
-      style={[
+      style={({ pressed }) => [
         styles.button,
         {
-          backgroundColor: getBackgroundColor(),
+          backgroundColor: getBackgroundColor(pressed),
           borderColor: getBorderColor(),
           borderWidth: variant === 'outline' ? 1.5 : 0,
+          opacity: disabled ? 0.6 : pressed ? 0.82 : 1,
+          transform: [{ scale: pressed && !disabled && !loading ? 0.98 : 1 }],
         },
         style,
       ]}>
@@ -106,7 +107,7 @@ export function AppButton({
           </Text>
         </>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -114,9 +115,9 @@ const styles = StyleSheet.create({
   button: {
     minHeight: Accessibility.minTouchTarget,
     minWidth: Accessibility.minTouchTarget,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    borderRadius: Radii.md,
+    borderRadius: Radii.xl,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

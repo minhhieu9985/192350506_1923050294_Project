@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useThemeColor';
-import { Spacing, Typography } from '../../constants/tokens';
+import { Radii, Spacing, Typography } from '../../constants/tokens';
 import { AppButton } from './AppButton';
 
 export interface StateViewProps {
@@ -51,7 +51,12 @@ export function StateView({
         accessible={true}
         accessibilityRole="progressbar"
         accessibilityLabel={loadingMessage}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <View style={[styles.iconCircle, { backgroundColor: colors.primaryMuted }]}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+        <Text style={[styles.title, { color: colors.textPrimary, marginTop: Spacing.sm }]}>
+          Đang tải dữ liệu
+        </Text>
         <Text style={[styles.message, { color: colors.textSecondary }]}>
           {loadingMessage}
         </Text>
@@ -67,19 +72,22 @@ export function StateView({
         accessible={true}
         accessibilityRole="alert"
         accessibilityLabel={`Lỗi: ${error}`}>
-        <MaterialIcons name="error-outline" size={48} color={colors.danger} />
-        <Text style={[styles.title, { color: colors.textPrimary }]}>
-          Đã xảy ra lỗi
+        <View style={[styles.iconCircle, { backgroundColor: colors.dangerMuted }]}>
+          <MaterialIcons name="cloud-off" size={44} color={colors.danger} />
+        </View>
+        <Text style={[styles.title, { color: colors.textPrimary, marginTop: Spacing.sm }]}>
+          Không thể tải dữ liệu
         </Text>
         <Text style={[styles.message, { color: colors.textSecondary }]}>
           {error}
         </Text>
         {onRetry ? (
           <AppButton
-            title="Thử lại"
+            title="Thử lại kết nối"
             onPress={onRetry}
             variant="primary"
             style={styles.actionBtn}
+            icon={<MaterialIcons name="refresh" size={18} color={colors.primaryContrast} />}
             accessibilityLabel="Nhấn để thử lại tải dữ liệu"
           />
         ) : null}
@@ -95,7 +103,12 @@ export function StateView({
         accessible={true}
         accessibilityRole="text"
         accessibilityLabel={emptyMessage}>
-        <MaterialIcons name={emptyIcon} size={54} color={colors.textMuted} />
+        <View style={[styles.iconCircle, { backgroundColor: colors.surfaceRaised }]}>
+          <MaterialIcons name={emptyIcon} size={48} color={colors.textMuted} />
+        </View>
+        <Text style={[styles.title, { color: colors.textPrimary, marginTop: Spacing.sm }]}>
+          Chưa có nội dung
+        </Text>
         <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
           {emptyMessage}
         </Text>
@@ -122,7 +135,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.xl,
-    gap: Spacing.md,
+    gap: Spacing.sm,
+  },
+  iconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: Radii.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xs,
   },
   title: {
     ...Typography.h3,
@@ -139,6 +160,6 @@ const styles = StyleSheet.create({
     maxWidth: 280,
   },
   actionBtn: {
-    marginTop: Spacing.sm,
+    marginTop: Spacing.md,
   },
 });
