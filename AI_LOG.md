@@ -114,6 +114,35 @@
 
 ---
 
+### Giai đoạn 8: Kiểm thử Thực tế (UAT) & Sửa các Lỗi Tương tác UI/UX
+- **Nội dung yêu cầu AI**:
+  - Chạy thử nghiệm thực tế trên nền tảng Web và xử lý các lỗi tương tác (interaction bugs), lỗi đồng bộ dữ liệu (data desync) và lỗi layout hiển thị.
+
+- **Những lỗi thực tế đã phát hiện & Cách xử lý**:
+  1. **Lỗi Đồng bộ Dữ liệu Đăng nhập (MSSV & Tên người bán)**:
+     - *Vấn đề*: Khi đăng nhập bằng MSSV mới, Header hiển thị đúng nhưng danh sách sản phẩm vẫn hiện tên cũ (Nguyễn Hoàng Nam) do dữ liệu bị hardcode trong seed data.
+     - *Cách sửa*: Yêu cầu AI xóa dữ liệu seed cũ, cập nhật trường sellerId thành dãy 10 chữ số (định dạng MSSV trường) và đồng bộ logic khi tạo Listing mới phải lấy user đang đăng nhập.
+  2. **Lỗi Ảnh bị Phóng to Quá cỡ (UI Layout)**:
+     - *Vấn đề*: Trên Web, ảnh trong ListingCard phình to chiếm cả màn hình do thiếu thuộc tính chiều cao.
+     - *Cách sửa*: Yêu cầu AI bọc ảnh vào một View có aspectRatio: 16/9 hoặc set height cố định, dùng resizeMode="cover".
+  3. **Lỗi Dữ liệu bị "Bay màu" sau khi F5 (Offline Persistence)**:
+     - *Vấn đề*: Tạo sản phẩm mới xong, F5 lại thì sản phẩm biến mất. Ảnh bị hỏng (broken image).
+     - *Nguyên nhân*: Do ảnh lưu dạng blob: URL tạm thời của trình duyệt, và dữ liệu chỉ lưu trong RAM thay vì AsyncStorage.
+     - *Cách sửa*: Yêu cầu AI chuyển logic nén ảnh sang trả về chuỗi Base64 để lưu vĩnh viễn. Đồng thời cấu hình lại mockApi.ts để lưu danh sách sản phẩm vào AsyncStorage.
+  4. **Lỗi Trái tim (Favourite) không đổi màu ngay lập tức**:
+     - *Vấn đề*: Bấm nút Yêu thích nhưng UI không cập nhật, phải F5 mới thấy màu đỏ.
+     - *Nguyên nhân*: Hàm toggleFavourite trong Zustand vô tình mutate (thay đổi trực tiếp) mảng state, khiến React không nhận diện được sự thay đổi để re-render.
+     - *Cách sửa*: Yêu cầu AI sửa lại hàm cập nhật state theo chuẩn immutable (tạo mảng mới bằng spread operator) và sử dụng useFavouritesStore((state) => state.favourites.includes(id)) trong Selector.
+  5. **Lỗi Mất trạng thái Đăng nhập sau khi F5**:
+     - *Vấn đề*: Đã bấm Đăng xuất, nhưng khi khởi động lại app vẫn vào được Trang chủ.
+     - *Cách sửa*: Yêu cầu AI thêm Auth Guard vào file src/app/_layout.tsx, kiểm tra nếu state user là null thì ép điều hướng về /sign-in.
+  6. **Lỗi Thiếu tính năng Nghiệp vụ (Gỡ sản phẩm)**:
+     - *Vấn đề*: Người bán không có nút gỡ sản phẩm của mình.
+     - *Cách sửa*: Yêu cầu AI viết thêm hàm deleteListing vào Mock API, tạo hook useDeleteListing, và thêm nút "Gỡ sản phẩm" màu đỏ ở màn hình Chi tiết (chỉ hiển thị khi Role là Seller và đúng ID người đăng).
+
+- **Đánh giá của nhóm**: AI rất mạnh trong việc tạo code mới, nhưng các lỗi tương tác (Interaction Bugs) và đồng bộ trạng thái (State Desync) chỉ có thể được phát hiện qua quá trình tự tay test UAT (User Acceptance Testing) của nhóm. Việc đưa ra các prompt debug chi tiết (kèm ảnh chụp màn hình lỗi) giúp AI sửa lỗi chính xác 100% ngay lần đầu.
+
+---
+
 ## 3. Tổng kết Đánh giá Sử dụng AI
 - **Điểm mạnh của AI**: Hỗ trợ viết boilerplate nhanh, tính toán toán học chính xác (ka-tex, color contrast, aspect ratio ratio), scaffold cấu trúc dự án chuẩn chỉ.
-- **Điểm cần lưu ý**: Cần giám sát chặt chẽ các thay đổi API của Expo/React Native (như React 19 async render trong testing, native module mocks trong Jest), đồng thời kiên quyết từ chối mã màu hex trực tiếp để tuân thủ 100% tiêu chí chấm điểm của giảng viên.
