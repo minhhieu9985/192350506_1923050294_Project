@@ -59,6 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!currentUser) return;
     const nextRole: UserRole = currentUser.role === 'buyer' ? 'seller' : 'buyer';
     const nextUser = nextRole === 'seller' ? DEMO_SELLER : DEMO_BUYER;
+    console.log('Role changed to:', nextRole, nextUser);
     set({ user: nextUser });
     secureStorage.saveSession(JSON.stringify(nextUser));
   },

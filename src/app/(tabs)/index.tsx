@@ -6,6 +6,9 @@ import {
   RefreshControl,
   Text,
   TouchableOpacity,
+  Pressable,
+  Platform,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -33,6 +36,41 @@ export default function HomeScreen() {
   const toggleFavourite = useFavouritesStore((s) => s.toggleFavourite);
   const addItem = useCartStore((s) => s.addItem);
   const currentUser = useAuthStore(selectCurrentUser);
+  const switchRole = useAuthStore((s) => s.switchRole);
+
+  const handleToggleRoleFromBanner = () => {
+    console.log('Banner pressed! Switching role for user:', currentUser?.studentId);
+    const currentRole = currentUser?.role ?? 'buyer';
+    const nextRoleName = currentRole === 'buyer' ? 'Người bán (Seller)' : 'Người mua (Buyer)';
+    const mssv = currentUser?.studentId ?? '';
+
+    if (Platform.OS === 'web') {
+      const confirmed = typeof window !== 'undefined'
+        ? window.confirm(
+            `[Campus Marketplace]\nMSSV: ${mssv}\nVai trò hiện tại: ${currentRole === 'buyer' ? 'Người mua (Buyer)' : 'Người bán (Seller)'}\n\nBạn muốn chuyển sang ${nextRoleName}?`
+          )
+        : true;
+      if (confirmed) {
+        switchRole();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Chuyển đổi vai trò',
+      `MSSV: ${mssv}\nVai trò hiện tại: ${currentRole === 'buyer' ? 'Người mua (Buyer)' : 'Người bán (Seller)'}\n\nBạn muốn chuyển sang ${nextRoleName}?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: `Chuyển sang ${nextRoleName}`,
+          onPress: () => {
+            console.log('Confirmed switch role from banner on mobile');
+            switchRole();
+          },
+        },
+      ]
+    );
+  };
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,11 +110,21 @@ export default function HomeScreen() {
       {/* Offline Alert Banner */}
       <OfflineBanner isOffline={isOffline} />
 
-      {/* Pull-to-refresh Last-updated Timestamp Banner */}
+      {/* Pull-to-refresh Last-updated Timestamp Banner & Quick Role Toggle */}
       <View style={[styles.metaHeader, { backgroundColor: colors.surfaceRaised }]}>
-        <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-          MSSV: {currentUser?.studentId} ({currentUser?.role === 'seller' ? 'Người bán' : 'Tìm mua'})
-        </Text>
+        <Pressable
+          onPress={handleToggleRoleFromBanner}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Chạm để chuyển đổi vai trò Buyer hoặc Seller"
+          style={({ pressed }) => [
+            styles.roleBannerPressable,
+            { opacity: pressed ? 0.6 : 1 },
+          ]}>
+          <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+            MSSV: <Text style={{ color: colors.primary, fontWeight: '700' }}>{currentUser?.studentId}</Text> ({currentUser?.role === 'seller' ? 'Người bán 🏪' : 'Tìm mua 🎒'}) ⇄
+          </Text>
+        </Pressable>
         <Text style={[styles.metaText, { color: colors.textMuted }]}>
           Cập nhật: {lastUpdated}
         </Text>
@@ -169,8 +217,13 @@ const styles = StyleSheet.create({
   metaHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: 6,
+  },
+  roleBannerPressable: {
+    paddingVertical: 2,
+    paddingRight: Spacing.sm,
   },
   metaText: {
     ...Typography.small,

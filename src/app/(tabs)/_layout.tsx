@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, useRouter } from 'expo-router';
-import { Alert, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { Alert, Platform, Pressable, View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useThemeColor';
 import { useCartStore, selectCartItemCount } from '../../store/cartStore';
@@ -16,23 +16,42 @@ export default function TabsLayout() {
   const signOut = useAuthStore((s) => s.signOut);
 
   const handleRoleToggle = () => {
+    console.log('Button pressed! Current role:', currentUser?.role);
     const currentRole = currentUser?.role ?? 'buyer';
-    const nextRole = currentRole === 'buyer' ? 'Người bán (Seller)' : 'Người mua (Buyer)';
+    const nextRoleName = currentRole === 'buyer' ? 'Người bán (Seller)' : 'Người mua (Buyer)';
     const mssv = currentUser?.studentId ?? '';
+
+    if (Platform.OS === 'web') {
+      // window.confirm on Web avoids React Native Web Alert.alert no-op issues
+      const confirmed = typeof window !== 'undefined'
+        ? window.confirm(
+            `[Campus Marketplace]\nMSSV: ${mssv}\nVai trò hiện tại: ${currentRole === 'buyer' ? 'Người mua (Buyer)' : 'Người bán (Seller)'}\n\nBạn muốn chuyển sang ${nextRoleName}?`
+          )
+        : true;
+      if (confirmed) {
+        switchRole();
+      }
+      return;
+    }
+
     Alert.alert(
       'Chuyển đổi vai trò',
-      `MSSV: ${mssv}\nVai trò hiện tại: ${currentRole === 'buyer' ? 'Người mua (Buyer)' : 'Người bán (Seller)'}\n\nBạn muốn chuyển sang ${nextRole}?`,
+      `MSSV: ${mssv}\nVai trò hiện tại: ${currentRole === 'buyer' ? 'Người mua (Buyer)' : 'Người bán (Seller)'}\n\nBạn muốn chuyển sang ${nextRoleName}?`,
       [
         { text: 'Hủy', style: 'cancel' },
         {
-          text: `Chuyển sang ${nextRole}`,
-          onPress: () => switchRole(),
+          text: `Chuyển sang ${nextRoleName}`,
+          onPress: () => {
+            console.log('Confirmed switch role on mobile');
+            switchRole();
+          },
         },
       ]
     );
   };
 
   const handleSignOut = async () => {
+    console.log('SignOut button pressed');
     await signOut();
     router.replace('/(auth)/sign-in');
   };
@@ -63,14 +82,15 @@ export default function TabsLayout() {
         headerRight: () => (
           <View style={styles.headerRightContainer}>
             {/* Quick Role Switcher Pill (Should-Have Feature) */}
-            <TouchableOpacity
+            <Pressable
               onPress={handleRoleToggle}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel={`Đổi vai trò hiện tại: ${currentUser?.role === 'seller' ? 'Người bán' : 'Người mua'}`}
-              style={[
+              style={({ pressed }) => [
                 styles.roleBadge,
                 {
+                  opacity: pressed ? 0.7 : 1,
                   backgroundColor:
                     currentUser?.role === 'seller'
                       ? colors.warningMuted
@@ -102,21 +122,24 @@ export default function TabsLayout() {
                 ]}>
                 {currentUser?.role === 'seller' ? 'Seller' : 'Buyer'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Logout Button */}
-            <TouchableOpacity
+            <Pressable
               onPress={handleSignOut}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Đăng xuất khỏi ứng dụng"
-              style={styles.iconBtn}>
+              style={({ pressed }) => [
+                styles.iconBtn,
+                { opacity: pressed ? 0.6 : 1 },
+              ]}>
               <MaterialIcons
                 name="logout"
                 size={22}
                 color={colors.textSecondary}
               />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         ),
       }}>
